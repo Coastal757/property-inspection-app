@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Property Inspection App</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --navy: #1a3a52;
+            --coral: #FF6B6B;
+            --light-blue: #D5E8F0;
+            --text: #2c3e50;
+            --bg: #f8f9fa;
+            --white: #ffffff;
+            --shadow: rgba(26, 58, 82, 0.1);
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .app-container {
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        .header {
+            background: var(--navy);
+            color: var(--white);
+            padding: 20px;
+            box-shadow: 0 2px 10px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: var(--white);
+            border-bottom: 2px solid var(--light-blue);
+            position: sticky;
+            top: 72px;
+            z-index: 99;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 16px;
+            background: none;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-tab.active {
+            color: var(--navy);
+        }
+        
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--coral);
+        }
+        
+        .content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--navy);
+            font-size: 14px;
+        }
+        
+        input[type="text"],
+        input[type="date"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--light-blue);
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--coral);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .section-header {
+            background: var(--navy);
+            color: var(--white);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .checklist-item {
+            border: 2px solid var(--light-blue);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .checklist-item.has-photo {
+            border-color: var(--coral);
+        }
+        
+        .item-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        
+        input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: var(--coral);
+        }
+        
+        .item-label {
+            font-weight: 500;
+            font-size: 15px;
+            flex: 1;
+        }
+        
+        .condition-select {
+            padding: 8px 12px;
+            border: 2px solid var(--light-blue);
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            background: var(--white);
+        }
+        
+        .notes-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--light-blue);
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 60px;
+            margin-top: 8px;
+        }
+        
+        .photo-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: var(--coral);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: #ff5252;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: var(--light-blue);
+            color: var(--navy);
+        }
+        
+        .btn-secondary:hover {
+            background: #c0dae8;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .photo-preview {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .photo-thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 2px solid var(--light-blue);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .photo-thumbnail:hover {
+            transform: scale(1.05);
+        }
+        
+        .appliance-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            padding: 16px 20px;
+            box-shadow: 0 -2px 10px var(--shadow);
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+        
+        .bottom-bar .btn {
+            flex: 1;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--navy);
+        }
+        
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .history-item {
+            border: 2px solid var(--light-blue);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .history-item:hover {
+            border-color: var(--coral);
+            transform: translateX(4px);
+        }
+        
+        .history-date {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--coral);
+            font-weight: 600;
+        }
+        
+        .history-address {
+            font-weight: 600;
+            margin: 4px 0;
+        }
+        
+        .history-type {
+            font-size: 13px;
+            opacity: 0.7;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            .appliance-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>🏠 Property Inspector</h1>
+            <div class="subtitle">Coastal Home Services</div>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="inspect">New Inspection</button>
+            <button class="nav-tab" data-tab="history">History</button>
+        </div>
+        
+        <div class="content">
+            <!-- INSPECTION TAB -->
+            <div id="inspect-tab" class="tab-content active">
+                <div class="card">
+                    <h2 style="margin-bottom: 16px; color: var(--navy);">Property Information</h2>
+                    
+                    <div class="form-group">
+                        <label>Inspection Type</label>
+                        <select id="inspection-type" class="condition-select" style="width: 100%; padding: 12px;" onchange="handleInspectionTypeChange()">
+                            <option value="move-in">Move-In</option>
+                            <option value="move-out">Move-Out</option>
+                            <option value="smoke-detector">Smoke Detector Inspection</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Property Address</label>
+                        <input type="text" 
+                               id="property-address" 
+                               list="address-options"
+                               placeholder="Select or type address">
+                        <datalist id="address-options"></datalist>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tenant Name</label>
+                        <input type="text" id="tenant-name" placeholder="John Doe">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Inspection Date</label>
+                        <input type="date" id="inspection-date">
+                    </div>
+                </div>
+                
+                <!-- APPLIANCES -->
+                <div class="section-header">
+                    <span>📱 Appliances</span>
+                </div>
+                
+                <div class="card">
+                    <div id="appliances-container"></div>
+                </div>
+                
+                <!-- KITCHEN -->
+                <div class="section-header">
+                    <span>🍳 Kitchen</span>
+                </div>
+                <div id="kitchen-container"></div>
+                
+                <!-- BATHROOMS -->
+                <div class="section-header">
+                    <span>🚿 Bathrooms</span>
+                </div>
+                <div id="bathrooms-container"></div>
+                
+                <!-- LIVING AREAS -->
+                <div class="section-header">
+                    <span>🛋️ Living Areas</span>
+                </div>
+                <div id="living-container"></div>
+                
+                <!-- EXTERIOR -->
+                <div class="section-header">
+                    <span>🌳 Exterior</span>
+                </div>
+                <div id="exterior-container"></div>
+                
+                <!-- UTILITIES -->
+                <div class="section-header" id="utilities-header">
+                    <span>⚡ Utilities & Systems</span>
+                </div>
+                <div id="utilities-container"></div>
+                
+                <!-- SMOKE DETECTORS - Only shown when type is smoke-detector -->
+                <div id="smoke-detector-section" style="display: none;">
+                    <div class="section-header">
+                        <span>🚨 Smoke Detector Inspection</span>
+                        <span style="font-size: 12px; font-weight: 400;">Virginia State Building Code Section 704</span>
+                    </div>
+                    <div class="card">
+                        <div class="form-group">
+                            <label>Inspector Name</label>
+                            <input type="text" id="inspector-name" placeholder="Inspector name">
+                        </div>
+                        <div class="form-group">
+                            <label>Company</label>
+                            <input type="text" id="inspector-company" value="Coastal Home Services" placeholder="Company name">
+                        </div>
+                        <div class="form-group">
+                            <label>Inspector Phone</label>
+                            <input type="text" id="inspector-phone" value="757-796-7560" placeholder="Phone number">
+                        </div>
+                        <div id="smoke-detectors-container"></div>
+                        <button class="btn btn-secondary" onclick="addSmokeDetector()" style="margin-top: 12px;">
+                            ➕ Add Detector Location
+                        </button>
+                        
+                        <div style="margin-top: 20px; padding: 16px; background: var(--light-blue); border-radius: 8px; font-size: 13px;">
+                            <div style="font-weight: 600; margin-bottom: 8px;">Certification Types:</div>
+                            <div>B = Battery | E = Electric | SAE = Smoke Alarm Electric | SAB = Smoke Alarm Battery</div>
+                        </div>
+                        
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="smoke-certified" style="width: 20px; height: 20px;">
+                                <span>All Smoke Detectors are certified to be in working condition</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- HISTORY TAB -->
+            <div id="history-tab" class="tab-content">
+                <div id="history-container"></div>
+            </div>
+        </div>
+        
+        <div class="bottom-bar">
+            <button class="btn btn-secondary" onclick="saveInspection()">💾 Save Draft</button>
+            <button class="btn btn-primary" onclick="generatePDF()">📄 Generate PDF</button>
+            <button class="btn btn-primary" onclick="emailPDF()">📧 Email PDF</button>
+        </div>
+    </div>
+    
+    <!-- Photo Modal -->
+    <div id="photo-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Photo Preview</div>
+            <img id="modal-photo" style="width: 100%; border-radius: 8px;">
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closePhotoModal()" style="flex: 1;">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        const propertyAddresses = [
+            "5369 Ashby Street Norfolk Va 23502",
+            "167 Burrage Road Norfolk Va 23503",
+            "624 Dudley Ave Norfolk Va 23503",
+            "8017 Elaine Court Norfolk Va 23518",
+            "3631 Johns Street Norfolk Va 23513",
+            "1041 E. Ocean View Avenue",
+            "577 W. Ocean View Avenue #1 Norfolk VA 23503",
+            "577 W. Ocean View Avenue #2 Norfolk VA 23503",
+            "577 W. Ocean View Avenue #3 Norfolk VA 23503",
+            "1949 Parkview Avenue #A Norfolk VA 23503",
+            "1949 Parkview Avenue #B Norfolk VA 23503",
+            "1953 Parkview Avenue #A Norfolk VA 23503",
+            "1953 Parkview Avenue #B Norfolk VA 23503",
+            "170 Rodman Road Norfolk VA 23503",
+            "758 Sheppard Avenue #A Norfolk VA 23518",
+            "758 Sheppard Avenue #B Norfolk VA 23518",
+            "1532 Virgilina Avenue Norfolk VA 23503"
+        ];
+        
+        const appliances = [
+            'Refrigerator', 'Stove/Range', 'Dishwasher', 'Microwave',
+            'Washer', 'Dryer', 'Water Heater', 'HVAC Unit'
+        ];
+        
+        const checklistItems = {
+            kitchen: [
+                'Cabinets (inside & out)', 'Countertops', 'Sink & faucet',
+                'Floors', 'Walls & ceiling', 'Light fixtures', 'Outlets & switches'
+            ],
+            bathrooms: [
+                'Toilet(s)', 'Sink(s) & faucet(s)', 'Tub/shower & fixtures',
+                'Tile & grout', 'Cabinets/vanity', 'Mirrors', 'Floors', 'Walls & ceiling'
+            ],
+            living: [
+                'Floors (carpet/hardwood/tile)', 'Walls (paint/condition)', 'Ceilings',
+                'Windows & screens', 'Window treatments', 'Doors (interior)',
+                'Closet doors & hardware', 'Light fixtures'
+            ],
+            exterior: [
+                'Entry door(s) & locks', 'Garage door & opener', 'Siding/exterior walls',
+                'Deck/patio', 'Fence/gate', 'Landscaping', 'Driveway/walkways'
+            ],
+            utilities: [
+                'HVAC operation', 'Plumbing (no leaks)', 'Electrical (all working)',
+                'Smoke detectors', 'CO detectors'
+            ]
+        };
+        
+        let currentInspection = {
+            type: 'move-in',
+            property: {},
+            appliances: {},
+            checklist: {},
+            photos: {},
+            smokeDetectors: [],
+            smokeInspector: {}
+        };
+        
+        const smokeDetectorLocations = [
+            '1st Floor Master', 'Living Room', 'Hall/Foyer', 'Family Room',
+            'Dining Room', 'Master Bedroom', 'Bedroom #1', 'Bedroom #2',
+            'Bedroom #3', 'Bedroom #4', 'Laundry', 'Garage', 'Other'
+        ];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('inspection-date').valueAsDate = new Date();
+            
+            // Populate address dropdown
+            const datalist = document.getElementById('address-options');
+            propertyAddresses.forEach(addr => {
+                const option = document.createElement('option');
+                option.value = addr;
+                datalist.appendChild(option);
+            });
+            
+            renderAppliances();
+            renderChecklist();
+            renderSmokeDetectors();
+            handleInspectionTypeChange();
+            loadHistory();
+            
+            // Tab switching
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+                });
+            });
+        });
+        
+        function handleInspectionTypeChange() {
+            const type = document.getElementById('inspection-type').value;
+            
+            try {
+                // Get section headers and containers
+                const appliancesHeader = document.getElementById('appliances-container')?.parentElement?.previousElementSibling;
+                const appliancesCard = document.getElementById('appliances-container')?.parentElement;
+                const kitchenHeader = document.getElementById('kitchen-container')?.previousElementSibling;
+                const kitchenSection = document.getElementById('kitchen-container');
+                const bathroomsHeader = document.getElementById('bathrooms-container')?.previousElementSibling;
+                const bathroomsSection = document.getElementById('bathrooms-container');
+                const livingHeader = document.getElementById('living-container')?.previousElementSibling;
+                const livingSection = document.getElementById('living-container');
+                const exteriorHeader = document.getElementById('exterior-container')?.previousElementSibling;
+                const exteriorSection = document.getElementById('exterior-container');
+                const utilitiesHeader = document.getElementById('utilities-header');
+                const utilitiesSection = document.getElementById('utilities-container');
+                const smokeSection = document.getElementById('smoke-detector-section');
+                
+                if (type === 'smoke-detector') {
+                    // Hide everything except smoke detectors
+                    if (appliancesHeader) appliancesHeader.style.display = 'none';
+                    if (appliancesCard) appliancesCard.style.display = 'none';
+                    if (kitchenHeader) kitchenHeader.style.display = 'none';
+                    if (kitchenSection) kitchenSection.style.display = 'none';
+                    if (bathroomsHeader) bathroomsHeader.style.display = 'none';
+                    if (bathroomsSection) bathroomsSection.style.display = 'none';
+                    if (livingHeader) livingHeader.style.display = 'none';
+                    if (livingSection) livingSection.style.display = 'none';
+                    if (exteriorHeader) exteriorHeader.style.display = 'none';
+                    if (exteriorSection) exteriorSection.style.display = 'none';
+                    if (utilitiesHeader) utilitiesHeader.style.display = 'none';
+                    if (utilitiesSection) utilitiesSection.style.display = 'none';
+                    if (smokeSection) smokeSection.style.display = 'block';
+                } else {
+                    // Show normal inspection sections, hide smoke detector
+                    if (appliancesHeader) appliancesHeader.style.display = 'flex';
+                    if (appliancesCard) appliancesCard.style.display = 'block';
+                    if (kitchenHeader) kitchenHeader.style.display = 'flex';
+                    if (kitchenSection) kitchenSection.style.display = 'block';
+                    if (bathroomsHeader) bathroomsHeader.style.display = 'flex';
+                    if (bathroomsSection) bathroomsSection.style.display = 'block';
+                    if (livingHeader) livingHeader.style.display = 'flex';
+                    if (livingSection) livingSection.style.display = 'block';
+                    if (exteriorHeader) exteriorHeader.style.display = 'flex';
+                    if (exteriorSection) exteriorSection.style.display = 'block';
+                    if (utilitiesHeader) utilitiesHeader.style.display = 'flex';
+                    if (utilitiesSection) utilitiesSection.style.display = 'block';
+                    if (smokeSection) smokeSection.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error in handleInspectionTypeChange:', error);
+            }
+        }
+        
+        function renderAppliances() {
+            const container = document.getElementById('appliances-container');
+            container.innerHTML = appliances.map((appliance, i) => `
+                <div class="checklist-item" id="appliance-${i}">
+                    <div class="appliance-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>${appliance}</label>
+                            <input type="text" 
+                                   placeholder="Model #" 
+                                   data-appliance="${i}" 
+                                   data-field="model"
+                                   onchange="updateAppliance(this)">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="opacity: 0;">Serial</label>
+                            <input type="text" 
+                                   placeholder="Serial #" 
+                                   data-appliance="${i}" 
+                                   data-field="serial"
+                                   onchange="updateAppliance(this)">
+                        </div>
+                    </div>
+                    <div class="photo-controls">
+                        <input type="file" 
+                               id="photo-appliance-${i}" 
+                               accept="image/*" 
+                               capture="environment"
+                               onchange="handleAppliancePhoto(this, ${i})">
+                        <label for="photo-appliance-${i}" class="btn btn-secondary btn-small">
+                            📷 Add Photo
+                        </label>
+                    </div>
+                    <div class="photo-preview" id="preview-appliance-${i}"></div>
+                </div>
+            `).join('');
+        }
+        
+        function renderChecklist() {
+            ['kitchen', 'bathrooms', 'living', 'exterior', 'utilities'].forEach(section => {
+                const container = document.getElementById(section + '-container');
+                container.innerHTML = checklistItems[section].map((item, i) => `
+                    <div class="checklist-item" id="${section}-${i}">
+                        <div class="item-header">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" 
+                                       data-section="${section}" 
+                                       data-index="${i}"
+                                       onchange="updateChecklist(this)">
+                            </div>
+                            <div class="item-label">${item}</div>
+                            <select class="condition-select" 
+                                    data-section="${section}" 
+                                    data-index="${i}" 
+                                    data-field="condition"
+                                    onchange="updateChecklist(this)">
+                                <option value="">Condition</option>
+                                <option value="Good">Good</option>
+                                <option value="Fair">Fair</option>
+                                <option value="Poor">Poor</option>
+                                <option value="N/A">N/A</option>
+                            </select>
+                        </div>
+                        <textarea class="notes-input" 
+                                  placeholder="Notes..." 
+                                  data-section="${section}" 
+                                  data-index="${i}"
+                                  data-field="notes"
+                                  onchange="updateChecklist(this)"></textarea>
+                        <div class="photo-controls">
+                            <input type="file" 
+                                   id="photo-${section}-${i}" 
+                                   accept="image/*" 
+                                   capture="environment"
+                                   onchange="handlePhoto(this, '${section}', ${i})">
+                            <label for="photo-${section}-${i}" class="btn btn-secondary btn-small">
+                                📷 Add Photo
+                            </label>
+                        </div>
+                        <div class="photo-preview" id="preview-${section}-${i}"></div>
+                    </div>
+                `).join('');
+            });
+        }
+        
+        function updateAppliance(input) {
+            const idx = input.dataset.appliance;
+            const field = input.dataset.field;
+            if (!currentInspection.appliances[idx]) {
+                currentInspection.appliances[idx] = { name: appliances[idx] };
+            }
+            currentInspection.appliances[idx][field] = input.value;
+        }
+        
+        function updateChecklist(input) {
+            const section = input.dataset.section;
+            const index = input.dataset.index;
+            const field = input.dataset.field;
+            const key = `${section}-${index}`;
+            
+            if (!currentInspection.checklist[key]) {
+                currentInspection.checklist[key] = {
+                    item: checklistItems[section][index],
+                    section: section
+                };
+            }
+            
+            if (input.type === 'checkbox') {
+                currentInspection.checklist[key].checked = input.checked;
+            } else {
+                currentInspection.checklist[key][field] = input.value;
+            }
+        }
+        
+        function handlePhoto(input, section, index) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const key = `${section}-${index}`;
+                if (!currentInspection.photos[key]) {
+                    currentInspection.photos[key] = [];
+                }
+                currentInspection.photos[key].push(e.target.result);
+                
+                // Update preview
+                const preview = document.getElementById(`preview-${section}-${index}`);
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'photo-thumbnail';
+                img.onclick = () => showPhotoModal(e.target.result);
+                preview.appendChild(img);
+                
+                // Mark item as having photo
+                document.getElementById(key).classList.add('has-photo');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function handleAppliancePhoto(input, index) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const key = `appliance-${index}`;
+                if (!currentInspection.photos[key]) {
+                    currentInspection.photos[key] = [];
+                }
+                currentInspection.photos[key].push(e.target.result);
+                
+                // Update preview
+                const preview = document.getElementById(`preview-appliance-${index}`);
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'photo-thumbnail';
+                img.onclick = () => showPhotoModal(e.target.result);
+                preview.appendChild(img);
+                
+                // Mark item as having photo
+                document.getElementById(key).classList.add('has-photo');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function showPhotoModal(src) {
+            document.getElementById('modal-photo').src = src;
+            document.getElementById('photo-modal').classList.add('active');
+        }
+        
+        function closePhotoModal() {
+            document.getElementById('photo-modal').classList.remove('active');
+        }
+        
+        function renderSmokeDetectors() {
+            const container = document.getElementById('smoke-detectors-container');
+            if (!container) return;
+            
+            if (currentInspection.smokeDetectors.length === 0) {
+                // Add default 5 empty locations without calling addSmokeDetector
+                for (let i = 0; i < 5; i++) {
+                    currentInspection.smokeDetectors.push({
+                        location: '',
+                        customLocation: '',
+                        type: '',
+                        manufacturer: '',
+                        mfgDate: ''
+                    });
+                }
+            }
+            
+            container.innerHTML = currentInspection.smokeDetectors.map((detector, i) => `
+                <div class="checklist-item" style="margin-bottom: 12px;">
+                    <div style="display: flex; gap: 12px; align-items: start; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-size: 12px; margin-bottom: 4px;">Location</label>
+                            <select class="condition-select" style="width: 100%;" 
+                                    data-detector="${i}" 
+                                    data-field="location"
+                                    onchange="updateSmokeDetector(this)">
+                                <option value="">Select Location</option>
+                                ${smokeDetectorLocations.map(loc => 
+                                    `<option value="${loc}" ${detector.location === loc ? 'selected' : ''}>${loc}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        ${detector.location === 'Other' ? `
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="font-size: 12px; margin-bottom: 4px;">Specify Location</label>
+                                <input type="text" 
+                                       class="condition-select" 
+                                       style="width: 100%; padding: 8px 12px;"
+                                       placeholder="Specify location"
+                                       data-detector="${i}"
+                                       data-field="customLocation"
+                                       value="${detector.customLocation || ''}"
+                                       onchange="updateSmokeDetector(this)">
+                            </div>
+                        ` : ''}
+                        <div style="flex: 1; min-width: 120px;">
+                            <label style="font-size: 12px; margin-bottom: 4px;">Type</label>
+                            <select class="condition-select" style="width: 100%;"
+                                    data-detector="${i}"
+                                    data-field="type"
+                                    onchange="updateSmokeDetector(this)">
+                                <option value="">Type</option>
+                                <option value="B" ${detector.type === 'B' ? 'selected' : ''}>B - Battery</option>
+                                <option value="E" ${detector.type === 'E' ? 'selected' : ''}>E - Electric</option>
+                                <option value="SAE" ${detector.type === 'SAE' ? 'selected' : ''}>SAE - Smoke Alarm Electric</option>
+                                <option value="SAB" ${detector.type === 'SAB' ? 'selected' : ''}>SAB - Smoke Alarm Battery</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-size: 12px; margin-bottom: 4px;">Manufacturer</label>
+                            <input type="text" 
+                                   class="condition-select" 
+                                   style="width: 100%; padding: 8px 12px;"
+                                   placeholder="Manufacturer"
+                                   data-detector="${i}"
+                                   data-field="manufacturer"
+                                   value="${detector.manufacturer || ''}"
+                                   onchange="updateSmokeDetector(this)">
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label style="font-size: 12px; margin-bottom: 4px;">Mfg Date</label>
+                            <input type="text" 
+                                   class="condition-select" 
+                                   style="width: 100%; padding: 8px 12px;"
+                                   placeholder="MM/YYYY"
+                                   data-detector="${i}"
+                                   data-field="mfgDate"
+                                   value="${detector.mfgDate || ''}"
+                                   onchange="updateSmokeDetector(this)">
+                        </div>
+                        <button class="btn btn-secondary btn-small" 
+                                style="margin-top: 20px;"
+                                onclick="removeSmokeDetector(${i})">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function addSmokeDetector() {
+            currentInspection.smokeDetectors.push({
+                location: '',
+                customLocation: '',
+                type: '',
+                manufacturer: '',
+                mfgDate: ''
+            });
+            renderSmokeDetectors();
+        }
+        
+        function removeSmokeDetector(index) {
+            currentInspection.smokeDetectors.splice(index, 1);
+            renderSmokeDetectors();
+        }
+        
+        function updateSmokeDetector(input) {
+            const index = parseInt(input.dataset.detector);
+            const field = input.dataset.field;
+            currentInspection.smokeDetectors[index][field] = input.value;
+            
+            // Re-render if location changed to/from "Other"
+            if (field === 'location') {
+                renderSmokeDetectors();
+            }
+        }
+        
+        function saveInspection() {
+            currentInspection.property = {
+                address: document.getElementById('property-address').value,
+                tenant: document.getElementById('tenant-name').value,
+                date: document.getElementById('inspection-date').value,
+                type: document.getElementById('inspection-type').value
+            };
+            
+            currentInspection.smokeInspector = {
+                name: document.getElementById('inspector-name').value,
+                company: document.getElementById('inspector-company').value,
+                phone: document.getElementById('inspector-phone').value,
+                certified: document.getElementById('smoke-certified').checked
+            };
+            
+            const inspections = JSON.parse(localStorage.getItem('inspections') || '[]');
+            const timestamp = new Date().toISOString();
+            currentInspection.id = timestamp;
+            currentInspection.savedAt = timestamp;
+            
+            inspections.push(currentInspection);
+            localStorage.setItem('inspections', JSON.stringify(inspections));
+            
+            alert('✅ Inspection saved!');
+            loadHistory();
+        }
+        
+        function loadHistory() {
+            const inspections = JSON.parse(localStorage.getItem('inspections') || '[]');
+            const container = document.getElementById('history-container');
+            
+            if (inspections.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <div>No inspections saved yet</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = inspections.reverse().map(insp => `
+                <div class="history-item" onclick="loadInspection('${insp.id}')">
+                    <div class="history-date">${new Date(insp.savedAt).toLocaleDateString()}</div>
+                    <div class="history-address">${insp.property.address || 'No address'}</div>
+                    <div class="history-type">${
+                        insp.property.type === 'move-in' ? 'Move-In' : 
+                        insp.property.type === 'move-out' ? 'Move-Out' : 
+                        'Smoke Detector'
+                    } Inspection</div>
+                </div>
+            `).join('');
+        }
+        
+        function loadInspection(id) {
+            const inspections = JSON.parse(localStorage.getItem('inspections') || '[]');
+            const inspection = inspections.find(i => i.id === id);
+            if (!inspection) return;
+            
+            currentInspection = inspection;
+            
+            // Switch to inspection tab
+            document.querySelector('[data-tab="inspect"]').click();
+            
+            // Load property info
+            document.getElementById('property-address').value = inspection.property.address || '';
+            document.getElementById('tenant-name').value = inspection.property.tenant || '';
+            document.getElementById('inspection-date').value = inspection.property.date || '';
+            document.getElementById('inspection-type').value = inspection.property.type || 'move-in';
+            
+            // Update visibility based on type
+            handleInspectionTypeChange();
+            
+            // Load appliances
+            Object.keys(inspection.appliances || {}).forEach(idx => {
+                const app = inspection.appliances[idx];
+                const modelInput = document.querySelector(`[data-appliance="${idx}"][data-field="model"]`);
+                const serialInput = document.querySelector(`[data-appliance="${idx}"][data-field="serial"]`);
+                if (modelInput) modelInput.value = app.model || '';
+                if (serialInput) serialInput.value = app.serial || '';
+            });
+            
+            // Load checklist
+            Object.keys(inspection.checklist || {}).forEach(key => {
+                const item = inspection.checklist[key];
+                const [section, index] = key.split('-');
+                
+                const checkbox = document.querySelector(`input[type="checkbox"][data-section="${section}"][data-index="${index}"]`);
+                const condition = document.querySelector(`select[data-section="${section}"][data-index="${index}"]`);
+                const notes = document.querySelector(`textarea[data-section="${section}"][data-index="${index}"]`);
+                
+                if (checkbox) checkbox.checked = item.checked || false;
+                if (condition) condition.value = item.condition || '';
+                if (notes) notes.value = item.notes || '';
+            });
+            
+            // Load photos
+            Object.keys(inspection.photos || {}).forEach(key => {
+                const photos = inspection.photos[key];
+                const preview = document.getElementById(`preview-${key}`);
+                if (preview) {
+                    preview.innerHTML = photos.map(src => `
+                        <img src="${src}" class="photo-thumbnail" onclick="showPhotoModal('${src}')">
+                    `).join('');
+                    document.getElementById(key).classList.add('has-photo');
+                }
+            });
+            
+            // Load smoke detector info
+            if (inspection.smokeInspector) {
+                document.getElementById('inspector-name').value = inspection.smokeInspector.name || '';
+                document.getElementById('inspector-company').value = inspection.smokeInspector.company || '';
+                document.getElementById('inspector-phone').value = inspection.smokeInspector.phone || '';
+                document.getElementById('smoke-certified').checked = inspection.smokeInspector.certified || false;
+            }
+            
+            if (inspection.smokeDetectors) {
+                currentInspection.smokeDetectors = inspection.smokeDetectors;
+                renderSmokeDetectors();
+            }
+            
+            alert('✅ Inspection loaded!');
+        }
+        
+        function generatePDF() {
+            saveInspection();
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const property = {
+                address: document.getElementById('property-address').value,
+                tenant: document.getElementById('tenant-name').value,
+                date: document.getElementById('inspection-date').value,
+                type: document.getElementById('inspection-type').value
+            };
+            
+            // Title
+            doc.setFontSize(20);
+            const title = property.type === 'move-in' ? 'MOVE-IN INSPECTION' : 
+                         property.type === 'move-out' ? 'MOVE-OUT INSPECTION' :
+                         'SMOKE DETECTOR INSPECTION';
+            doc.text(title, 20, 20);
+            
+            // Property info
+            doc.setFontSize(12);
+            let y = 35;
+            doc.text(`Property: ${property.address}`, 20, y);
+            y += 7;
+            doc.text(`Tenant: ${property.tenant}`, 20, y);
+            y += 7;
+            doc.text(`Date: ${property.date}`, 20, y);
+            y += 15;
+            
+            // Appliances
+            doc.setFontSize(14);
+            doc.text('Appliances', 20, y);
+            y += 7;
+            doc.setFontSize(10);
+            
+            Object.values(currentInspection.appliances || {}).forEach(app => {
+                if (app.model || app.serial) {
+                    doc.text(`${app.name}: Model ${app.model || 'N/A'}, Serial ${app.serial || 'N/A'}`, 25, y);
+                    y += 5;
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                }
+            });
+            
+            y += 10;
+            
+            // Smoke Detectors
+            if (currentInspection.smokeDetectors && currentInspection.smokeDetectors.length > 0) {
+                if (y > 250) {
+                    doc.addPage();
+                    y = 20;
+                }
+                
+                doc.setFontSize(14);
+                doc.text('Smoke Detector Inspection (VA Building Code §704)', 20, y);
+                y += 7;
+                doc.setFontSize(10);
+                
+                if (currentInspection.smokeInspector) {
+                    const insp = currentInspection.smokeInspector;
+                    doc.text(`Inspector: ${insp.name || 'N/A'}`, 25, y);
+                    y += 5;
+                    doc.text(`Company: ${insp.company || 'N/A'}`, 25, y);
+                    y += 5;
+                    doc.text(`Phone: ${insp.phone || 'N/A'}`, 25, y);
+                    y += 7;
+                }
+                
+                currentInspection.smokeDetectors.forEach(detector => {
+                    const location = detector.location === 'Other' 
+                        ? `Other: ${detector.customLocation}` 
+                        : detector.location;
+                    const type = detector.type ? `[${detector.type}]` : '';
+                    const mfg = detector.manufacturer ? `Mfg: ${detector.manufacturer}` : '';
+                    const date = detector.mfgDate ? `Date: ${detector.mfgDate}` : '';
+                    
+                    if (location) {
+                        doc.text(`• ${location} ${type} ${mfg} ${date}`, 25, y);
+                        y += 5;
+                        if (y > 270) {
+                            doc.addPage();
+                            y = 20;
+                        }
+                    }
+                });
+                
+                if (currentInspection.smokeInspector && currentInspection.smokeInspector.certified) {
+                    y += 5;
+                    doc.setFontSize(11);
+                    doc.text('✓ All Smoke Detectors certified to be in working condition', 25, y);
+                    y += 7;
+                    doc.setFontSize(10);
+                }
+                
+                y += 5;
+            }
+            
+            // Checklist items
+            doc.setFontSize(14);
+            doc.text('Inspection Items', 20, y);
+            y += 7;
+            doc.setFontSize(10);
+            
+            Object.values(currentInspection.checklist || {}).forEach(item => {
+                if (item.checked || item.condition || item.notes) {
+                    const status = item.checked ? '✓' : '○';
+                    const cond = item.condition ? ` [${item.condition}]` : '';
+                    doc.text(`${status} ${item.item}${cond}`, 25, y);
+                    y += 5;
+                    
+                    if (item.notes) {
+                        doc.setFontSize(9);
+                        const lines = doc.splitTextToSize(`   Notes: ${item.notes}`, 160);
+                        lines.forEach(line => {
+                            doc.text(line, 25, y);
+                            y += 4;
+                        });
+                        doc.setFontSize(10);
+                    }
+                    
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                }
+            });
+            
+            // Save
+            const filename = `inspection-${property.address.replace(/[^a-z0-9]/gi, '-')}-${property.date}.pdf`;
+            doc.save(filename);
+            
+            alert('✅ PDF generated!');
+        }
+        
+        
+        function emailPDF() {
+            const property = {
+                address: document.getElementById('property-address').value,
+                tenant: document.getElementById('tenant-name').value,
+                date: document.getElementById('inspection-date').value,
+                type: document.getElementById('inspection-type').value
+            };
+            
+            if (!property.address) {
+                alert('⚠️ Please enter a property address');
+                return;
+            }
+            
+            // Generate and download PDF first
+            generatePDF();
+            
+            // Prepare email
+            const title = property.type === 'move-in' ? 'MOVE-IN INSPECTION' : 
+                         property.type === 'move-out' ? 'MOVE-OUT INSPECTION' :
+                         'SMOKE DETECTOR INSPECTION';
+            
+            const recipient = 'anchor@coastalhomeservices.org';
+            const subject = encodeURIComponent(`${title} - ${property.address}`);
+            const body = encodeURIComponent(`Please find attached the ${title.toLowerCase()} for ${property.address}.
+
+Tenant: ${property.tenant || 'N/A'}
+Date: ${property.date}
+
+--
+Coastal Home Services
+757-796-7560`);
+            
+            // Open email to Coastal Home Services
+            setTimeout(() => {
+                window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
+                alert('📧 PDF downloaded! Email opening to anchor@coastalhomeservices.org - attach the PDF and send.');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
